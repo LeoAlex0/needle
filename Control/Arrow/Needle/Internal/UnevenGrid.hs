@@ -8,7 +8,7 @@ Maintainer  : jjvk2@cam.ac.uk
 Implements a 'Grid' data structure which can be examined and moved around with a monad 'GridExamine', used in needle parsing.
 -}
 
-{-# LANGUAGE DeriveFunctor, OverloadedLists, GeneralizedNewtypeDeriving, TupleSections#-}
+{-# LANGUAGE DeriveFunctor, GeneralizedNewtypeDeriving, TupleSections #-}
 
 module Control.Arrow.Needle.Internal.UnevenGrid (
     -- * Grids
@@ -43,8 +43,8 @@ import Prelude as Pre
 import Data.Foldable as F
 
 import Data.Vector as V
-import Data.Maybe 
-import Data.List 
+import Data.Maybe
+import Data.List
 import Data.Sequence as S
 
 import Control.Applicative
@@ -68,7 +68,7 @@ import Control.Arrow
 newtype Grid e = Grid { rows :: Vector (GridRow e) }
     deriving (Eq, Functor, Show)
 
-newtype GridRow e = GridRow { elements :: Vector (GridElem e) } 
+newtype GridRow e = GridRow { elements :: Vector (GridElem e) }
     deriving (Eq, Functor, Show)
 
 fromLeft :: GridRow e -> Int -> Maybe Int
@@ -113,8 +113,8 @@ height = V.length . rows
 
 (!!?) :: Grid e -> GridPosition -> Maybe e
 (!!?) grid (rowPos, elemPos) = do
-    row <- rows grid !? rowPos
-    element <- elements row !? elemPos
+    row <- rows grid V.!? rowPos
+    element <- elements row V.!? elemPos
     return $ unwrap element
 
 -- | Return a list of positions satisfying a predicate in a grid, in reading order.
@@ -160,8 +160,8 @@ here = do
     grid <- getGrid
     (rowPos, elemPos) <- getPosition
     return $ do
-        row <- rows grid !? rowPos
-        element <- elements row !? elemPos
+        row <- rows grid V.!? rowPos
+        element <- elements row V.!? elemPos
         return element
 
 -- | Get the element at the current position.
@@ -177,7 +177,7 @@ hereGet = do
 leftGet :: GridExamine e (Maybe e)
 leftGet = do
     (rowPos, elemPos) <- getPosition
-    if elemPos > 0 
+    if elemPos > 0
         then putPosition (rowPos, elemPos - 1) >> (hereGet)
         else return Nothing
 
@@ -189,8 +189,8 @@ rightGet = do
     grid <- getGrid
     (rowPos, elemPos) <- getPosition
     fromMaybe (return Nothing) $ do
-        row <- rows grid !? elemPos 
-        element <- elements row !? (elemPos + 1)
+        row <- rows grid V.!? elemPos
+        element <- elements row V.!? (elemPos + 1)
         return $ putPosition (rowPos, elemPos + 1) >> return (Just $ unwrap element)
 
 -- | Move to and return the grid element above the column a certain distance 
@@ -204,7 +204,7 @@ rUpGet n = do
     (rowPos, _) <- getPosition
     fromMaybe (return Nothing) $ do
         currentElement <- mCurrentElement
-        newRow <- rows grid !? (rowPos - 1)
+        newRow <- rows grid V.!? (rowPos - 1)
         i <- fromLeft newRow (end currentElement - 1 - n)
         return $ putPosition (rowPos - 1, i) >> hereGet
 
@@ -219,7 +219,7 @@ rDownGet n = do
     (rowPos, _) <- getPosition
     fromMaybe (return Nothing) $ do
         currentElement <- mCurrentElement
-        newRow <- rows grid !? (rowPos + 1)
+        newRow <- rows grid V.!? (rowPos + 1)
         i <- fromLeft newRow (end currentElement - 1 - n)
         return $ putPosition (rowPos + 1, i) >> hereGet
 
@@ -232,9 +232,9 @@ lUpGet n = do
     grid <- getGrid
     (rowPos, elemPos) <- getPosition
     fromMaybe (return Nothing) $ do
-        row <- rows grid !? rowPos
-        let start = fromMaybe 0 $ end <$> (elements row !? (elemPos - 1))
-        newRow <- rows grid !? (rowPos - 1)
+        row <- rows grid V.!? rowPos
+        let start = fromMaybe 0 $ end <$> (elements row V.!? (elemPos - 1))
+        newRow <- rows grid V.!? (rowPos - 1)
         i <- fromLeft newRow (start + n)
         return $ putPosition (rowPos - 1, i) >> hereGet
 
@@ -247,9 +247,9 @@ lDownGet n = do
     grid <- getGrid
     (rowPos, elemPos) <- getPosition
     fromMaybe (return Nothing) $ do
-        row <- rows grid !? rowPos
-        let start = fromMaybe 0 $ end <$> (elements row !? (elemPos - 1))
-        newRow <- rows grid !? (rowPos + 1)
+        row <- rows grid V.!? rowPos
+        let start = fromMaybe 0 $ end <$> (elements row V.!? (elemPos - 1))
+        newRow <- rows grid V.!? (rowPos + 1)
         i <- fromLeft newRow (start + n)
         return $ putPosition (rowPos + 1, i) >> hereGet
 
@@ -271,6 +271,6 @@ width = do
     mh <- here
     return $ do
         h <- mh
-        row <- rows grid !? rowPos
-        let start = fromMaybe 0 $ end <$> (elements row !? (elemPos - 1))
+        row <- rows grid V.!? rowPos
+        let start = fromMaybe 0 $ end <$> (elements row V.!? (elemPos - 1))
         return (end h - start)

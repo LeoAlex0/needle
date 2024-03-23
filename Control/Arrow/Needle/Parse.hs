@@ -8,6 +8,8 @@ Maintainer  : jjvk2@cam.ac.uk
 This module's main export is 'parseNeedle', which parses a needle diagram into a `NeedleArrow`.
 -}
 
+{-# LANGUAGE FlexibleContexts #-}
+
 module Control.Arrow.Needle.Parse (
   -- * Parsing needles
     NeedleArrow (..)
@@ -25,7 +27,6 @@ import Data.Either
 import Data.Monoid
 
 import Text.Parsec as P
-import Text.Parsec.Extra (natural)
 import Data.Char
 
 import Control.Monad

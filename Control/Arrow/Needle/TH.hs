@@ -105,7 +105,7 @@ arrowQ arrow = do
 
             return $ InfixE (Just b) (VarE $ mkName ">>>") $ Just
                 $ AppE (VarE $ mkName "arr") 
-                $ LamE [tupleNames aNames] (TupE $ Pre.map VarE aNames)
+                $ LamE [tupleNames aNames] (TupE $ Pre.map (Just .VarE) aNames)
 
     f arrow
 
